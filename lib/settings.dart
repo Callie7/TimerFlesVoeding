@@ -1,50 +1,38 @@
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flesvoeding_timer/settings/duration.dart';
+import 'package:flutter/material.dart';
 
-class Settings {
-  static const String keyNamePeriodH = "PeriodH";
-  static const String keyNamePeriodM = "PeriodM";
-  static const String keyNameStartTime = "StartTime";
+class Settings extends StatelessWidget {
+  final List<Widget> settingEntries = <Widget>[
+    DurationSetting(),
+  ];
 
-  static const String keyNameCounterDate = "CounterDate";
-  static const String keyNameCounterYesterday = "CounterYesterday";
-  static const String keyNameCounterToday = "CounterToday";
 
-  static Future<Duration> getPeriod() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    int periodH = prefs.getInt(Settings.keyNamePeriodH) ?? 3;
-    int periodM = prefs.getInt(Settings.keyNamePeriodM) ?? 0;
-    return Duration(hours: periodH, minutes: periodM);
-  }
-
-  static void setStartTime(DateTime startTime) {
-    _setString(keyNameStartTime, startTime.toString());
-  }
-
-  static void setCounterDate(DateTime counterDate) {
-    _setString(keyNameCounterDate, counterDate.toString());
-  }
-
-  static void setCounters(int counterToday, int counterYesterday) {
-    _setInt(keyNameCounterToday, counterToday);
-    _setInt(keyNameCounterYesterday, counterYesterday);
-  }
-
-  static void setCounterToday(int counterToday) {
-    _setInt(keyNameCounterToday, counterToday);
-  }
-
-  static void setPeriod(int hours, int minutes) {
-    _setInt(keyNamePeriodM, minutes);
-    _setInt(keyNamePeriodH, hours);
-  }
-
-  static _setString(String key, String value) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString(key, value);
-  }
-
-  static _setInt(String key, int value) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setInt(key, value);
+  
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        centerTitle: false,
+        title: Text("Instellingen"),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ),
+      body: SafeArea(
+        child: Container(
+          color: Colors.white,
+          width: double.infinity,
+          child: ListView.builder(
+              padding: const EdgeInsets.all(8),
+              itemCount: settingEntries.length,
+              itemBuilder: (BuildContext context, int index) {
+                return settingEntries[index];
+              }),
+        ),
+      ),
+    );
   }
 }

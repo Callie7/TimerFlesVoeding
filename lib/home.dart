@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import './counter_bar.dart';
 import './confirm_button.dart';
 import './timer.dart';
+import './preferences.dart';
 import 'settings.dart';
 
 class Home extends StatefulWidget {
@@ -18,12 +19,6 @@ class _HomeState extends State<Home> {
 
   Duration _duration = Duration(hours: 3);
 
-  AnimatedTimer animatedTimer;
-
-  _HomeState() {
-    animatedTimer = AnimatedTimer(_duration);
-  }
-
   @override
   void initState() {
     super.initState();
@@ -37,15 +32,16 @@ class _HomeState extends State<Home> {
   }
 
   void loadCounterValues() async {
-    int counter = _prefs.getInt(Settings.keyNameCounterToday) ?? 0;
-    int counterYesterday = _prefs.getInt(Settings.keyNameCounterYesterday) ?? 0;
-    String counterDate = _prefs.getString(Settings.keyNameCounterDate);
+    int counter = _prefs.getInt(Preferences.keyNameCounterToday) ?? 0;
+    int counterYesterday =
+        _prefs.getInt(Preferences.keyNameCounterYesterday) ?? 0;
+    String counterDate = _prefs.getString(Preferences.keyNameCounterDate);
 
     if (counterDate == null) {
-      Settings.setCounterDate(DateTime.now());
+      Preferences.setCounterDate(DateTime.now());
       counterYesterday = 0;
       counter = 0;
-      Settings.setCounters(counter, counterYesterday);
+      Preferences.setCounters(counter, counterYesterday);
     } else {
       final DateFormat dateFormat = DateFormat('yyyyMMdd');
       final int differenceInDays =
@@ -55,13 +51,13 @@ class _HomeState extends State<Home> {
         //Set counter yesterday with the latest value of counterToday
         counterYesterday = counter;
         counter = 0;
-        Settings.setCounters(counter, counterYesterday);
+        Preferences.setCounters(counter, counterYesterday);
       } else if (differenceInDays > 1) {
         counterYesterday = 0;
         counter = 0;
-        Settings.setCounters(counter, counterYesterday);
+        Preferences.setCounters(counter, counterYesterday);
       }
-      Settings.setCounterDate(DateTime.now());
+      Preferences.setCounterDate(DateTime.now());
     }
     setState(() {
       _counter = counter;
@@ -70,8 +66,10 @@ class _HomeState extends State<Home> {
   }
 
   void loadDuration() async {
-    int periodH = _prefs.getInt(Settings.keyNamePeriodH) ?? 3;
-    int periodM = _prefs.getInt(Settings.keyNamePeriodM) ?? 0;
+    int periodH = _prefs.getInt(Preferences.keyNamePeriodH) ?? 3;
+    int periodM = _prefs.getInt(Preferences.keyNamePeriodM) ?? 0;
+    print('hours: "$periodH"');
+    print('minutes: "$periodM"');
 
     setState(() {
       _duration = Duration(hours: periodH, minutes: periodM);
@@ -81,6 +79,22 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.settings),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => Settings()),
+              );
+              setState(() {
+                loadDuration();
+              });
+            },
+          ),
+        ],
+      ),
       body: SafeArea(
         child: Container(
           color: Colors.white,
@@ -99,7 +113,7 @@ class _HomeState extends State<Home> {
                     borderRadius: BorderRadius.all(Radius.circular(20)),
                   ),
                   child: Center(
-                    child: animatedTimer,
+                    child: AnimatedTimer(_duration),
                   ),
                 ),
               ),
@@ -116,17 +130,12 @@ class _HomeState extends State<Home> {
 
   void confirmed() {
     increaseCounter();
-    resetTimer();
   }
 
   void increaseCounter() {
     setState(() {
       _counter++;
     });
-    Settings.setCounterToday(_counter);
-  }
-
-  void resetTimer() {
-    animatedTimer.resetTimer();
+    Preferences.setCounterToday(_counter);
   }
 }

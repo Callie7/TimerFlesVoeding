@@ -4,26 +4,22 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'settings.dart';
+import './preferences.dart';
 
 class AnimatedTimer extends StatefulWidget {
-  final Duration duration;
-  _AnimatedTimerState state;
+  final Duration _duration;
 
-  AnimatedTimer(this.duration) {
-    state = _AnimatedTimerState(duration);
-  }
+  AnimatedTimer(this._duration);
 
-  void resetTimer() {
-    state.resetTimer();
-  }
+  // void resetTimer() {
+  //   state.resetTimer();
+  // }
 
   @override
-  _AnimatedTimerState createState() => state;
+  _AnimatedTimerState createState() => _AnimatedTimerState();
 }
 
 class _AnimatedTimerState extends State<AnimatedTimer> {
-  Duration _duration;
   Timer alertTimer;
   Timer counterTimer;
   DateTime _toTime;
@@ -32,9 +28,9 @@ class _AnimatedTimerState extends State<AnimatedTimer> {
   String _animationName = 'empty';
   SharedPreferences _prefs;
 
-  _AnimatedTimerState(this._duration) {
+  _AnimatedTimerState() {
     _startTime = DateTime.now();
-    _toTime = _startTime.add(_duration);
+    _toTime = _startTime.add(widget._duration);
   }
 
   @override
@@ -42,7 +38,7 @@ class _AnimatedTimerState extends State<AnimatedTimer> {
     super.initState();
     loadData();
     counterTimer = Timer.periodic(Duration(seconds: 3), updateAnimation);
-    alertTimer = Timer(_duration, startAlert);
+    alertTimer = Timer(widget._duration, startAlert);
   }
 
   void loadData() async {
@@ -51,15 +47,15 @@ class _AnimatedTimerState extends State<AnimatedTimer> {
   }
 
   void loadStartTime() {
-    String startTime = _prefs.getString(Settings.keyNameStartTime);
+    String startTime = _prefs.getString(Preferences.keyNameStartTime);
 
     if (startTime == null) {
       _startTime = DateTime.now();
-      Settings.setStartTime(_startTime);
+      Preferences.setStartTime(_startTime);
     } else {
       setState(() {
         _startTime = DateTime.parse(startTime);
-        _toTime = _startTime.add(_duration);
+        _toTime = _startTime.add(widget._duration);
       });
     }
   }
@@ -114,39 +110,26 @@ class _AnimatedTimerState extends State<AnimatedTimer> {
             .ceil();
     if (percentage <= 100) {
       setState(() {
-        switch (percentage) {
-          case 10:
-            _animationName = '0-10';
-            break;
-          case 20:
-            _animationName = '10-20';
-            break;
-          case 30:
-            _animationName = '20-30';
-            break;
-          case 40:
-            _animationName = '30-40';
-            break;
-          case 50:
-            _animationName = '40-50';
-            break;
-          case 60:
-            _animationName = '50-60';
-            break;
-          case 70:
-            _animationName = '60-70';
-            break;
-          case 80:
-            _animationName = '70-80';
-            break;
-          case 90:
-            _animationName = '80-90';
-            break;
-          case 100:
-            _animationName = 'full';
-            break;
-          default:
-        }
+        if(percentage >= 10 && percentage < 20)
+          _animationName = '0-10';
+        if(percentage >= 20 && percentage < 30)
+          _animationName = '10-20';
+        if(percentage >= 30 && percentage < 40)
+          _animationName = '20-30';
+        if(percentage >= 40 && percentage < 50)
+          _animationName = '30-40';
+        if(percentage >= 50 && percentage < 60)
+          _animationName = '40-50';
+        if(percentage >= 60 && percentage < 70)
+          _animationName = '50-60';
+        if(percentage >= 70 && percentage < 80)
+          _animationName = '60-70';
+        if(percentage >= 80 && percentage < 90)
+          _animationName = '70-80';
+        if(percentage >= 90 && percentage < 100)
+          _animationName = '80-90';
+        if(percentage == 100)
+          _animationName = 'full';
       });
     }
   }
@@ -155,14 +138,14 @@ class _AnimatedTimerState extends State<AnimatedTimer> {
     print('tijd om voeding te geven');
   }
 
-  void resetTimer() {
-    _startTime = DateTime.now();
-    Settings.setStartTime(_startTime);
-    setState(() {
-      _toTime = DateTime.now().add(_duration);
-      _animationName = 'empty';
-    });
-    alertTimer.cancel();
-    alertTimer = Timer(_duration, startAlert);
-  }
+  // void resetTimer() {
+  //   _startTime = DateTime.now();
+  //   Preferences.setStartTime(_startTime);
+  //   setState(() {
+  //     _toTime = DateTime.now().add(_duration);
+  //     _animationName = 'empty';
+  //   });
+  //   alertTimer.cancel();
+  //   alertTimer = Timer(_duration, startAlert);
+  // }
 }
